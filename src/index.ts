@@ -16,17 +16,20 @@ const server = new McpServer({
 // Tool 1: search_skills_online
 // ─────────────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   'search_skills_online',
-  `Search the skills.sh registry for coding skills and patterns. Provide 1-4 kebab-case search keywords as variations of what you're looking for (e.g., ["react", "react-best-practices", "react-patterns", "frontend-react"]). The server searches all variations concurrently and returns the Top 3 matching skills ranked by popularity. Use this when you need an architectural pattern, best practice, or coding skill but don't know the exact skill name.`,
   {
-    keywords: z
-      .array(z.string().min(1).max(100))
-      .min(1)
-      .max(4)
-      .describe(
-        'Array of 1-4 kebab-case search keyword variations for the desired skill'
-      ),
+    title: 'Search Skills Online',
+    description: `Search the skills.sh registry for coding skills and patterns. Provide 1-4 kebab-case search keywords as variations of what you're looking for (e.g., ["react", "react-best-practices", "react-patterns", "frontend-react"]). The server searches all variations concurrently and returns the Top 3 matching skills ranked by popularity. Use this when you need an architectural pattern, best practice, or coding skill but don't know the exact skill name.`,
+    inputSchema: {
+      keywords: z
+        .array(z.string().min(1).max(100))
+        .min(1)
+        .max(4)
+        .describe(
+          'Array of 1-4 kebab-case search keyword variations for the desired skill'
+        ),
+    },
   },
   async ({ keywords }) => {
     try {
@@ -81,27 +84,30 @@ server.tool(
 // Tool 2: fetch_skill_content
 // ─────────────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   'fetch_skill_content',
-  `Fetch the complete SKILL.md content for a specific skill. Provide the skillId and source from search_skills_online results.
+  {
+    title: 'Fetch Skill Content',
+    description: `Fetch the complete SKILL.md content for a specific skill. Provide the skillId and source from search_skills_online results.
 
 CRITICAL RULES AFTER RECEIVING CONTENT:
 1. Your VERY FIRST line of output to the user MUST be: 🛠️ [Active Skill: <skill-name>]
 2. If you see this badge in chat history, the skill is already active — use this tool to reload if you lost context.
 3. If the user says the code FAILED or wants a completely different approach, DO NOT reload this skill. Run a fresh search_skills_online and pick a DIFFERENT skill.`,
-  {
-    skillId: z
-      .string()
-      .min(1)
-      .describe(
-        "The skillId from search results (e.g., 'git-commit')"
-      ),
-    source: z
-      .string()
-      .min(1)
-      .describe(
-        "The source from search results (e.g., 'github/awesome-copilot')"
-      ),
+    inputSchema: {
+      skillId: z
+        .string()
+        .min(1)
+        .describe(
+          "The skillId from search results (e.g., 'git-commit')"
+        ),
+      source: z
+        .string()
+        .min(1)
+        .describe(
+          "The source from search results (e.g., 'github/awesome-copilot')"
+        ),
+    },
   },
   async ({ skillId, source }) => {
     try {
